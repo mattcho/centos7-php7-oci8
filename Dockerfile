@@ -1,33 +1,16 @@
-FROM centos:7
+FROM fedora:27
 
 LABEL maintainer="matt.cho@gmx.com"
 
-# As instructed in https://hub.docker.com/_/centos/
-RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
-  systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-  rm -f /lib/systemd/system/multi-user.target.wants/*;\
-  rm -f /etc/systemd/system/*.wants/*;\
-  rm -f /lib/systemd/system/local-fs.target.wants/*; \
-  rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-  rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-  rm -f /lib/systemd/system/basic.target.wants/*;\
-  rm -f /lib/systemd/system/anaconda.target.wants/*;
-VOLUME [ "/sys/fs/cgroup" ]
-
-# Remi repo
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-
-# Dev tools: c/c++ compilers, gcc, and make, etc.
-# RUN yum -y groupinstall 'Development Tools'
-RUN yum -y install gcc make libaio libpng-devel systemtap-sdt-devel
+# Dev tools
+RUN yum -y install gcc gcc-c++ make libaio libpng-devel systemtap-sdt-devel
 
 # Node
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 RUN yum -y install nodejs
 
 # Utils: vim, unzip, etc.
-RUN yum -y install vim, unzip
+RUN yum -y install vim unzip
 
 # Apache
 RUN yum -y install httpd
@@ -35,11 +18,11 @@ COPY ./app-httpd.conf /etc/httpd/conf.d/app-httpd.conf
 
 # Set the default directory
 WORKDIR /var/www/app
-# ADD ./phpinfo.php /var/www/app
+ADD ./phpinfo.php /var/www/app
 
 # PHP 7.1
-RUN yum -y install yum-utils
-RUN yum-config-manager --enable remi-php71
+# RUN yum -y install yum-utils
+# RUN yum-config-manager --enable remi-php71
 RUN yum -y install php php-pear php-devel
 RUN yum -y install php-mbstring php-pgsql
 
